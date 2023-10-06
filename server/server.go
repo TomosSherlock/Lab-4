@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"net"
+	"strconv"
 )
 
 type Message struct {
@@ -70,20 +71,14 @@ func main() {
 		for {
 			select {
 			case conn := <-conns:
-				//TODO Deal with a new connection
-				// - assign a client ID
-				// - add the client to the clients channel
-				// - start to asynchronously handle messages from this client
 				clientID := len(clients)
 				clients[clientID] = conn
 				go handleClient(conn, clientID, msgs)
 			case msg := <-msgs:
-				//TODO Deal with a new message
-				// Send the message to all clients that aren't the sender
 				for _, conn := range clients {
-					//if clients[i] != conn {
-					fmt.Fprintln(conn, msg)
-					//}
+					if clients[msg.sender] != conn {
+						fmt.Fprint(conn, "User "+strconv.Itoa(msg.sender)+":"+msg.message)
+					}
 				}
 			}
 		}
